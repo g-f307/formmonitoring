@@ -19,7 +19,8 @@ import java.util.Map;
  */
 public class TestRunner {
 
-    private static final String FORM_URL = "http://localhost:8080/form-monitoring/jsp/form-exemplo.jsp";
+    // ✅ URL LIMPA - usando rota servlet
+    private static final String FORM_URL = "http://localhost:8080/formmonitoring/form-exemplo";
 
     /**
      * Executa todos os testes
