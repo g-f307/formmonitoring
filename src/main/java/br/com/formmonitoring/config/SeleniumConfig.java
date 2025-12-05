@@ -6,19 +6,30 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.GeckoDriverService;
 
+import java.io.File;
 import java.time.Duration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Configuração centralizada para Selenium WebDriver
- * VERSÃO CORRIGIDA PARA LINUX/FEDORA
+ * Configuração otimizada do Selenium WebDriver
+ * Versão melhorada para reduzir warnings
  */
 public class SeleniumConfig {
 
-    // MUDADO PARA FIREFOX (mais compatível com Linux)
-    private static final String BROWSER = "firefox"; // chrome ou firefox
-    private static final boolean HEADLESS = true; // true para modo headless (sem GUI)
+    private static final String BROWSER = "firefox";
+    private static final boolean HEADLESS = true;
     private static final int TIMEOUT_SECONDS = 10;
+
+    // Suprime logs do Selenium
+    static {
+        Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
+        Logger.getLogger("org.openqa.selenium.os.ExternalProcess").setLevel(Level.OFF);
+        System.setProperty("webdriver.firefox.logfile", "/dev/null"); // Linux
+        // System.setProperty("webdriver.firefox.logfile", "NUL"); // Windows
+    }
 
     /**
      * Obtém uma instância configurada do WebDriver
@@ -31,6 +42,16 @@ public class SeleniumConfig {
                 System.out.println("🦊 Inicializando Firefox WebDriver...");
 
                 WebDriverManager.firefoxdriver().setup();
+
+                // Configurações do serviço para reduzir logs
+                GeckoDriverService.Builder serviceBuilder = new GeckoDriverService.Builder()
+                        .withLogOutput(new java.io.OutputStream() {
+                            @Override
+                            public void write(int b) {
+                                // Descarta logs do geckodriver
+                            }
+                        });
+
                 FirefoxOptions options = new FirefoxOptions();
 
                 if (HEADLESS) {
@@ -38,11 +59,16 @@ public class SeleniumConfig {
                     System.out.println("   ✓ Modo headless ativado");
                 }
 
-                // Opções adicionais para Linux
+                // Opções para reduzir warnings e melhorar performance
                 options.addArguments("--no-sandbox");
                 options.addArguments("--disable-dev-shm-usage");
+                options.addArguments("--disable-gpu");
+                options.setPageLoadStrategy(org.openqa.selenium.PageLoadStrategy.NORMAL);
 
-                driver = new FirefoxDriver(options);
+                // Suprime logs do Firefox
+                options.addPreference("devtools.console.stdout.content", false);
+
+                driver = new FirefoxDriver(serviceBuilder.build(), options);
                 System.out.println("   ✓ Firefox iniciado com sucesso!");
 
             } else {
@@ -53,15 +79,19 @@ public class SeleniumConfig {
                 ChromeOptions options = new ChromeOptions();
 
                 if (HEADLESS) {
-                    options.addArguments("--headless");
+                    options.addArguments("--headless=new"); // Nova sintaxe do Chrome
                 }
+
                 options.addArguments("--no-sandbox");
                 options.addArguments("--disable-dev-shm-usage");
                 options.addArguments("--disable-gpu");
                 options.addArguments("--window-size=1920,1080");
+                options.addArguments("--disable-logging");
+                options.addArguments("--log-level=3");
+                options.addArguments("--silent");
 
-                // Para Linux, tenta localizar o Chrome em locais comuns
-                options.setBinary("/usr/bin/google-chrome");
+                // Suprime logs do Chrome
+                options.setExperimentalOption("excludeSwitches", new String[]{"enable-logging"});
 
                 driver = new ChromeDriver(options);
                 System.out.println("   ✓ Chrome iniciado com sucesso!");
@@ -78,27 +108,14 @@ public class SeleniumConfig {
         } catch (Exception e) {
             System.err.println("❌ ERRO ao inicializar WebDriver:");
             System.err.println("   Browser: " + BROWSER);
-            System.err.println("   Headless: " + HEADLESS);
             System.err.println("   Erro: " + e.getMessage());
-
-            // Sugestões de solução
-            System.err.println("\n💡 SUGESTÕES:");
-            if (BROWSER.equalsIgnoreCase("chrome")) {
-                System.err.println("   1. Instale o Chrome: sudo dnf install google-chrome-stable");
-                System.err.println("   2. Ou mude para Firefox na linha 18: private static final String BROWSER = \"firefox\";");
-            } else {
-                System.err.println("   1. Instale o Firefox: sudo dnf install firefox");
-                System.err.println("   2. Verifique se está instalado: which firefox");
-            }
-
-            e.printStackTrace();
         }
 
         return driver;
     }
 
     /**
-     * Fecha o driver de forma segura
+     * Fecha o driver de forma segura e silenciosa
      */
     public static void quitDriver(WebDriver driver) {
         if (driver != null) {
@@ -106,7 +123,7 @@ public class SeleniumConfig {
                 driver.quit();
                 System.out.println("✓ WebDriver fechado com sucesso");
             } catch (Exception e) {
-                System.err.println("Erro ao fechar driver: " + e.getMessage());
+                // Ignora erros ao fechar (comum com processos já encerrados)
             }
         }
     }
@@ -128,7 +145,6 @@ public class SeleniumConfig {
 
             System.out.println("✅ WebDriver iniciado com sucesso!");
 
-            // Testa navegação
             driver.get("https://www.example.com");
             System.out.println("✅ Navegação funcionando!");
 
@@ -139,7 +155,6 @@ public class SeleniumConfig {
 
         } catch (Exception e) {
             System.err.println("❌ Erro no teste: " + e.getMessage());
-            e.printStackTrace();
             return false;
 
         } finally {
@@ -147,16 +162,8 @@ public class SeleniumConfig {
         }
     }
 
-    /**
-     * Main para testar a configuração
-     */
     public static void main(String[] args) {
         boolean success = testWebDriver();
-
-        if (success) {
-            System.out.println("\n🎉 TUDO FUNCIONANDO!");
-        } else {
-            System.err.println("\n❌ TESTE FALHOU - Verifique os erros acima");
-        }
+        System.out.println(success ? "\n🎉 TUDO FUNCIONANDO!" : "\n❌ TESTE FALHOU");
     }
 }
