@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -13,6 +14,10 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- IMPORTANTE: Pular testes de integração por padrão -->
+        <skipIntegrationTests>true</skipIntegrationTests>
+        <skipUnitTests>false</skipUnitTests>
     </properties>
 
     <dependencies>
@@ -44,11 +49,20 @@
             <version>8.0.33</version>
         </dependency>
 
-        <!-- JUnit 4 -->
+        <!-- JUnit 5 (Jupiter) -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit 5 Suite -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>1.10.1</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Selenium WebDriver -->
@@ -72,49 +86,7 @@
             <version>20231013</version>
         </dependency>
 
-        <!-- Gson (para JSON nos servlets) -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-
-        <!-- Quartz Scheduler (para agendamento de testes - opcional) -->
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.3.2</version>
-        </dependency>
-
-        <!-- MySQL Connector -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
-        </dependency>
-
-        <!-- JUnit -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Selenium WebDriver -->
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>4.15.0</version>
-        </dependency>
-
-        <!-- WebDriverManager -->
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>5.6.2</version>
-        </dependency>
-
+        <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -127,12 +99,8 @@
             <artifactId>quartz</artifactId>
             <version>2.3.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
+
+        <!-- Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -143,11 +111,7 @@
     <build>
         <finalName>form-monitoring</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.2</version>
-            </plugin>
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -157,6 +121,167 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+
+            <!-- WAR Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+            </plugin>
+
+            <!--
+                SUREFIRE: Testes Unitários (não requerem servidor rodando)
+                Executados durante 'mvn test' e 'mvn package'
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <!-- Pula testes unitários se necessário -->
+                    <skipTests>${skipUnitTests}</skipTests>
+
+                    <!-- Exclui testes de integração (que precisam do servidor) -->
+                    <excludes>
+                        <exclude>**/Form*Test.java</exclude>
+                        <exclude>**/*IntegrationTest.java</exclude>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+
+                    <!-- Inclui apenas testes unitários simples -->
+                    <includes>
+                        <include>**/*UnitTest.java</include>
+                        <include>**/unit/**/*Test.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!--
+                FAILSAFE: Testes de Integração (requerem servidor rodando)
+                Executados APENAS quando você explicitamente roda 'mvn verify'
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <skipITs>${skipIntegrationTests}</skipITs>
+
+                    <!-- Inclui apenas testes de integração -->
+                    <includes>
+                        <include>**/Form*Test.java</include>
+                        <include>**/*IntegrationTest.java</include>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                CARGO: Gerencia o Tomcat automaticamente
+                Inicia antes dos testes de integração, para depois
+            -->
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven3-plugin</artifactId>
+                <version>1.10.10</version>
+                <configuration>
+                    <container>
+                        <containerId>tomcat11x</containerId>
+                        <type>embedded</type>
+                    </container>
+
+                    <configuration>
+                        <properties>
+                            <cargo.servlet.port>8080</cargo.servlet.port>
+                            <cargo.logging>high</cargo.logging>
+                        </properties>
+                    </configuration>
+
+                    <deployables>
+                        <deployable>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <type>war</type>
+                            <properties>
+                                <context>/form-monitoring</context>
+                            </properties>
+                        </deployable>
+                    </deployables>
+                </configuration>
+
+                <!-- Inicia antes dos testes de integração -->
+                <executions>
+                    <execution>
+                        <id>start-container</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- Para depois dos testes -->
+                    <execution>
+                        <id>stop-container</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <!--
+        PROFILES: Diferentes modos de execução
+    -->
+    <profiles>
+        <!-- Profile padrão: Build sem testes de integração -->
+        <profile>
+            <id>fast-build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <skipIntegrationTests>true</skipIntegrationTests>
+                <skipUnitTests>false</skipUnitTests>
+            </properties>
+        </profile>
+
+        <!-- Profile: Build completo SEM testes -->
+        <profile>
+            <id>no-tests</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <skipIntegrationTests>true</skipIntegrationTests>
+                <skipUnitTests>true</skipUnitTests>
+            </properties>
+        </profile>
+
+        <!-- Profile: Build com testes de integração -->
+        <profile>
+            <id>integration-tests</id>
+            <properties>
+                <skipIntegrationTests>false</skipIntegrationTests>
+                <skipUnitTests>false</skipUnitTests>
+            </properties>
+        </profile>
+
+        <!-- Profile: Apenas testes de integração -->
+        <profile>
+            <id>only-integration</id>
+            <properties>
+                <skipIntegrationTests>false</skipIntegrationTests>
+                <skipUnitTests>true</skipUnitTests>
+            </properties>
+        </profile>
+    </profiles>
 </project>

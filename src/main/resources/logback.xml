@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console Appender com formato limpo -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Suprimir warnings do Selenium (NÍVEL SIMPLES) -->
+    <logger name="org.openqa.selenium" level="ERROR"/>
+    <logger name="org.openqa.selenium.os.ExternalProcess" level="OFF"/>
+
+    <!-- Configuração padrão -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Seus pacotes em modo INFO -->
+    <logger name="br.com.formmonitoring" level="INFO"/>
+
+</configuration>

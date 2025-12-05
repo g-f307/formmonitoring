@@ -3,77 +3,142 @@ package br.com.formmonitoring.tests;
 import br.com.formmonitoring.config.SeleniumConfig;
 import br.com.formmonitoring.model.TestResult;
 import br.com.formmonitoring.validators.AccessibilityValidator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebDriver;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Testes JUnit de Acessibilidade
- * Colocar em: src/test/java/br/com/formmonitoring/tests/FormAccessibilityTest.java
- */
-public class FormAccessibilityTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayName("Testes de Acessibilidade Web")
+class FormAccessibilityTest {
+
+    private static final String FORM_URL = "http://localhost:8080/form-monitoring/jsp/form-exemplo.jsp";
+    private static final double MIN_SCORE_THRESHOLD = 70.0;
 
     private WebDriver driver;
     private AccessibilityValidator validator;
-    private String formUrl = "http://localhost:8080/form-monitoring/jsp/form-exemplo.jsp";
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("🚀 Inicializando teste de Acessibilidade");
+        System.out.println("=".repeat(60));
+
         driver = SeleniumConfig.getDriver();
         validator = new AccessibilityValidator();
-        System.out.println("=== Setup: Iniciando teste de Acessibilidade ===");
+
+        assertNotNull(driver, "WebDriver não foi inicializado corretamente");
     }
 
     @Test
-    public void testLabelsAssociados() {
-        System.out.println("Executando: testLabelsAssociados");
-        TestResult result = validator.validateAssociatedLabels(driver, formUrl);
+    @Order(1)
+    @DisplayName("Deve validar que todos os inputs possuem labels associados")
+    void deveValidarLabelsAssociados() {
+        System.out.println("📋 Teste: Labels associados aos campos");
 
-        System.out.println("  Resultado: " + result.getDetails());
-        System.out.println("  Score: " + result.getScore() + "%");
+        TestResult result = validator.validateAssociatedLabels(driver, FORM_URL);
 
-        assertTrue("Menos de 90% dos inputs possuem labels associados", result.isPassed());
+        assertNotNull(result, "Resultado do teste não pode ser nulo");
+
+        System.out.println("   ✓ Categoria: " + result.getCategory());
+        System.out.println("   ✓ Score: " + String.format("%.1f%%", result.getScore()));
+        System.out.println("   ✓ Detalhes: " + result.getDetails());
+        System.out.println("   ✓ Status: " + (result.isPassed() ? "✅ PASSOU" : "❌ FALHOU"));
+
+        assertTrue(result.getScore() >= MIN_SCORE_THRESHOLD,
+                String.format("Score de labels (%.1f%%) está abaixo do mínimo aceitável (%.1f%%)",
+                        result.getScore(), MIN_SCORE_THRESHOLD));
+
+        assertTrue(result.isPassed(),
+                "Teste de labels associados falhou: " + result.getDetails());
     }
 
     @Test
-    public void testCamposObrigatorios() {
-        System.out.println("Executando: testCamposObrigatorios");
-        TestResult result = validator.validateRequiredFieldsIndication(driver, formUrl);
+    @Order(2)
+    @DisplayName("Deve validar indicação visual de campos obrigatórios")
+    void deveValidarIndicacaoCamposObrigatorios() {
+        System.out.println("📋 Teste: Indicação de campos obrigatórios");
 
-        System.out.println("  Resultado: " + result.getDetails());
-        System.out.println("  Score: " + result.getScore() + "%");
+        TestResult result = validator.validateRequiredFieldsIndication(driver, FORM_URL);
 
-        assertTrue("Campos obrigatórios sem indicação visual adequada", result.isPassed());
+        assertNotNull(result, "Resultado do teste não pode ser nulo");
+
+        System.out.println("   ✓ Categoria: " + result.getCategory());
+        System.out.println("   ✓ Score: " + String.format("%.1f%%", result.getScore()));
+        System.out.println("   ✓ Detalhes: " + result.getDetails());
+        System.out.println("   ✓ Status: " + (result.isPassed() ? "✅ PASSOU" : "❌ FALHOU"));
+
+        assertTrue(result.getScore() >= 60.0,
+                String.format("Score de indicação de campos obrigatórios (%.1f%%) está abaixo do mínimo (60%%)",
+                        result.getScore()));
+
+        assertTrue(result.isPassed(),
+                "Campos obrigatórios sem indicação visual adequada: " + result.getDetails());
     }
 
     @Test
-    public void testAtributosARIA() {
-        System.out.println("Executando: testAtributosARIA");
-        TestResult result = validator.validateARIAAttributes(driver, formUrl);
+    @Order(3)
+    @DisplayName("Deve validar presença de atributos ARIA para acessibilidade")
+    void deveValidarAtributosARIA() {
+        System.out.println("📋 Teste: Atributos ARIA");
 
-        System.out.println("  Resultado: " + result.getDetails());
-        System.out.println("  Score: " + result.getScore() + "%");
+        TestResult result = validator.validateARIAAttributes(driver, FORM_URL);
 
-        assertTrue("Poucos elementos com atributos ARIA", result.isPassed());
+        assertNotNull(result, "Resultado do teste não pode ser nulo");
+
+        System.out.println("   ✓ Categoria: " + result.getCategory());
+        System.out.println("   ✓ Score: " + String.format("%.1f%%", result.getScore()));
+        System.out.println("   ✓ Detalhes: " + result.getDetails());
+        System.out.println("   ✓ Status: " + (result.isPassed() ? "✅ PASSOU" : "❌ FALHOU"));
+
+        assertTrue(result.getScore() >= 30.0,
+                String.format("Score de atributos ARIA (%.1f%%) está abaixo do mínimo (30%%)",
+                        result.getScore()));
+
+        assertTrue(result.isPassed(),
+                "Poucos elementos com atributos ARIA: " + result.getDetails());
     }
 
     @Test
-    public void testContrasteElementos() {
-        System.out.println("Executando: testContrasteElementos");
-        TestResult result = validator.validateElementVisibility(driver, formUrl);
+    @Order(4)
+    @DisplayName("Deve validar visibilidade e contraste de elementos do formulário")
+    void deveValidarVisibilidadeElementos() {
+        System.out.println("📋 Teste: Visibilidade de elementos");
 
-        System.out.println("  Resultado: " + result.getDetails());
-        System.out.println("  Score: " + result.getScore() + "%");
+        TestResult result = validator.validateElementVisibility(driver, FORM_URL);
 
-        assertTrue("Elementos com baixa visibilidade detectados", result.isPassed());
+        assertNotNull(result, "Resultado do teste não pode ser nulo");
+
+        System.out.println("   ✓ Categoria: " + result.getCategory());
+        System.out.println("   ✓ Score: " + String.format("%.1f%%", result.getScore()));
+        System.out.println("   ✓ Detalhes: " + result.getDetails());
+        System.out.println("   ✓ Status: " + (result.isPassed() ? "✅ PASSOU" : "❌ FALHOU"));
+
+        assertTrue(result.getScore() >= 90.0,
+                String.format("Score de visibilidade (%.1f%%) está abaixo do mínimo (90%%)",
+                        result.getScore()));
+
+        assertTrue(result.isPassed(),
+                "Elementos com baixa visibilidade detectados: " + result.getDetails());
+
+        // Validação adicional
+        assertEquals("Acessibilidade", result.getCategory(),
+                "Categoria do teste deve ser Acessibilidade");
     }
 
-    @After
-    public void tearDown() {
-        SeleniumConfig.quitDriver(driver);
-        System.out.println("=== TearDown: Teste finalizado ===\n");
+    @AfterEach
+    void tearDown() {
+        if (driver != null) {
+            SeleniumConfig.quitDriver(driver);
+            System.out.println("\n🏁 Teste finalizado - WebDriver encerrado");
+            System.out.println("=".repeat(60) + "\n");
+        }
+    }
+
+    @AfterAll
+    static void summary() {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("📊 RESUMO: Testes de Acessibilidade concluídos");
+        System.out.println("=".repeat(60) + "\n");
     }
 }
