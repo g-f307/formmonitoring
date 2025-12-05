@@ -8,15 +8,8 @@ import org.openqa.selenium.WebElement;
 import java.sql.Timestamp;
 import java.util.List;
 
-/**
- * Validador de Usabilidade - AJUSTADO
- * Critérios realistas para diferenciar bom de ruim
- */
 public class UsabilityValidator {
 
-    /**
-     * Valida número ideal de campos
-     */
     public TestResult validateFieldCount(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -30,14 +23,13 @@ public class UsabilityValidator {
 
             int totalCampos = campos.size();
 
-            // 3-10 campos = bom, fora disso = ruim
             boolean passou = totalCampos >= 3 && totalCampos <= 10;
 
             double score;
             if (totalCampos >= 4 && totalCampos <= 8) {
-                score = 100.0; // Ideal
+                score = 100.0;
             } else if (totalCampos >= 3 && totalCampos <= 10) {
-                score = 85.0; // Aceitável
+                score = 85.0;
             } else if (totalCampos > 10) {
                 score = Math.max(50.0, 100.0 - (totalCampos - 10) * 5);
             } else {
@@ -59,9 +51,6 @@ public class UsabilityValidator {
         }
     }
 
-    /**
-     * Valida botão submit visível
-     */
     public TestResult validateSubmitButton(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -91,12 +80,10 @@ public class UsabilityValidator {
                 }
             }
 
-            // Apenas verifica se tem botão visível (texto curto ok para teste inicial)
             boolean passou = botoesVisiveis > 0;
 
             double score = passou ? 100.0 : 0.0;
 
-            // Bônus se tiver texto descritivo (mais de 5 caracteres)
             if (passou && textoMaisLongo.length() > 5) {
                 score = 100.0;
             } else if (passou && textoMaisLongo.length() > 2) {
@@ -118,9 +105,6 @@ public class UsabilityValidator {
         }
     }
 
-    /**
-     * Valida estrutura de mensagens de erro
-     */
     public TestResult validateErrorMessages(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -128,7 +112,6 @@ public class UsabilityValidator {
             driver.get(formUrl);
             Thread.sleep(1000);
 
-            // Busca containers de erro
             List<WebElement> errorContainers = driver.findElements(
                     By.cssSelector(".error, .error-message, .invalid-feedback, [class*='error'], [id*='error'], [id*='Error']")
             );
@@ -137,18 +120,17 @@ public class UsabilityValidator {
                     By.cssSelector("input:not([type='submit']):not([type='button']), select, textarea")
             );
 
-            // Critério mais flexível: ter PELO MENOS 1 container de erro
             boolean temEstrutura = errorContainers.size() > 0;
 
             double score;
             if (errorContainers.size() >= campos.size()) {
-                score = 100.0; // 1 por campo = perfeito
+                score = 100.0;
             } else if (errorContainers.size() >= campos.size() / 2) {
-                score = 90.0; // Pelo menos metade
+                score = 90.0;
             } else if (errorContainers.size() > 0) {
-                score = 70.0; // Tem alguns
+                score = 70.0;
             } else {
-                score = 0.0; // Não tem nenhum
+                score = 0.0;
             }
 
             return createTestResult(
@@ -167,9 +149,6 @@ public class UsabilityValidator {
         }
     }
 
-    /**
-     * Valida máscaras e validação de entrada
-     */
     public TestResult validateInputMasks(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -197,7 +176,6 @@ public class UsabilityValidator {
                 );
             }
 
-            // Critério: pelo menos 50% dos campos devem ter placeholder/pattern/maxlength
             double percentual = (camposComMascara.size() * 100.0) / todosCamposTexto.size();
             boolean passou = percentual >= 50;
 
@@ -217,9 +195,6 @@ public class UsabilityValidator {
         }
     }
 
-    /**
-     * Valida type="email" correto
-     */
     public TestResult validateEmailValidation(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -227,12 +202,10 @@ public class UsabilityValidator {
             driver.get(formUrl);
             Thread.sleep(1000);
 
-            // Busca campos com type="email"
             List<WebElement> emailInputs = driver.findElements(
                     By.cssSelector("input[type='email']")
             );
 
-            // Busca campos de texto que parecem ser email
             List<WebElement> camposTexto = driver.findElements(
                     By.cssSelector("input[type='text']")
             );
@@ -257,16 +230,15 @@ public class UsabilityValidator {
                 }
             }
 
-            // Se tem emails incorretos = RUIM, se não tem = BOM ou neutro
             boolean passou = emailsIncorretos == 0;
 
             double score;
             if (emailsIncorretos == 0 && emailsCorretos > 0) {
-                score = 100.0; // Perfeito - tem emails com type correto
+                score = 100.0;
             } else if (emailsIncorretos == 0) {
-                score = 100.0; // Ok - não tem emails
+                score = 100.0;
             } else {
-                score = 20.0; // RUIM - tem emails com type errado
+                score = 20.0;
             }
 
             String details;
@@ -293,9 +265,6 @@ public class UsabilityValidator {
         }
     }
 
-    /**
-     * Valida agrupamento lógico de campos
-     */
     public TestResult validateFieldGrouping(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -314,20 +283,19 @@ public class UsabilityValidator {
                     By.cssSelector("input:not([type='submit']):not([type='button']), select, textarea")
             );
 
-            // Critério flexível: se tem mais de 3 campos, deve ter pelo menos 1 agrupamento
             boolean passou = campos.size() <= 3 || gruposEncontrados > 0;
 
             double score;
             if (gruposEncontrados >= campos.size()) {
-                score = 100.0; // Cada campo agrupado
+                score = 100.0;
             } else if (gruposEncontrados >= Math.max(1, campos.size() / 3)) {
-                score = 90.0; // Bom agrupamento
+                score = 90.0;
             } else if (gruposEncontrados > 0) {
-                score = 70.0; // Algum agrupamento
+                score = 70.0;
             } else if (campos.size() <= 3) {
-                score = 100.0; // Poucos campos, não precisa agrupar
+                score = 100.0;
             } else {
-                score = 30.0; // Muitos campos sem agrupamento
+                score = 30.0;
             }
 
             return createTestResult(
@@ -345,8 +313,6 @@ public class UsabilityValidator {
             return createErrorResult("Agrupamento Lógico de Campos", "Design", formUrl, e);
         }
     }
-
-    // ==================== MÉTODOS AUXILIARES ====================
 
     private TestResult createTestResult(String testName, String category,
                                         boolean passed, double score,

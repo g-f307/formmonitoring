@@ -24,14 +24,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Jakarta JSP API (Tomcat 11) -->
-        <dependency>
-            <groupId>jakarta.servlet.jsp</groupId>
-            <artifactId>jakarta.servlet.jsp-api</artifactId>
-            <version>3.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Jakarta JSTL (Tomcat 11) -->
         <dependency>
             <groupId>org.glassfish.web</groupId>
@@ -123,14 +115,6 @@
             <version>5.6.2</version>
         </dependency>
 
-        <!-- JSON -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20231013</version>
-        </dependency>
-
-        <!-- Gson (alternativa para JSON) -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -147,12 +131,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

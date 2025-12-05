@@ -7,10 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * Servlet para exibir o formulário RUIM (exemplo de más práticas)
- * Rota: /formmonitoring/form-ruim
- */
 @WebServlet({"/form-ruim", "/formulario-ruim"})
 public class FormRuimServlet extends HttpServlet {
 
@@ -18,7 +14,6 @@ public class FormRuimServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Encaminha para o JSP
         request.getRequestDispatcher("/jsp/form-ruim.jsp").forward(request, response);
     }
 

@@ -187,13 +187,11 @@ public class TestResultDAO {
     }
 
     public static class CategoryStats {
-        // É boa prática usar private, mas o essencial aqui são os Getters
         private String category;
         private int total;
         private int passed;
         private double avgScore;
 
-        // Getters e Setters (Necessários para o JSP acessar as variáveis)
         public String getCategory() {
             return category;
         }

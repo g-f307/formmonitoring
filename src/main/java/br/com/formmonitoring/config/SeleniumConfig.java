@@ -11,17 +11,12 @@ import java.time.Duration;
 
 public class SeleniumConfig {
 
-    private static final String BROWSER = "firefox"; // ou "chrome"
+    private static final String BROWSER = "firefox";
 
-    // ⚠️ IMPORTANTE: false para ver os testes em tempo real
     private static final boolean HEADLESS = false;
 
     private static final int TIMEOUT_SECONDS = 10;
 
-    /**
-     * Obtém uma instância configurada do WebDriver
-     * COM VISUALIZAÇÃO (headless = false)
-     */
     public static WebDriver getDriver() {
         WebDriver driver = null;
 
@@ -45,7 +40,6 @@ public class SeleniumConfig {
 
                 driver = new FirefoxDriver(options);
 
-                // Maximiza janela para melhor visualização
                 driver.manage().window().maximize();
 
                 System.out.println("   ✓ Firefox iniciado com sucesso!");
@@ -89,16 +83,12 @@ public class SeleniumConfig {
         return driver;
     }
 
-    /**
-     * Fecha o driver de forma segura
-     */
     public static void quitDriver(WebDriver driver) {
         if (driver != null) {
             try {
                 driver.quit();
                 System.out.println("✓ WebDriver fechado com sucesso");
             } catch (Exception e) {
-                // Ignora erros ao fechar
             }
         }
     }

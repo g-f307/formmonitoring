@@ -8,14 +8,8 @@ import org.openqa.selenium.WebElement;
 import java.sql.Timestamp;
 import java.util.List;
 
-/**
- * Validador de Acessibilidade - AJUSTADO
- */
 public class AccessibilityValidator {
 
-    /**
-     * Valida se os inputs possuem labels associados
-     */
     public TestResult validateAssociatedLabels(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -37,7 +31,6 @@ public class AccessibilityValidator {
             for (WebElement input : inputs) {
                 String id = input.getAttribute("id");
 
-                // Verifica label com "for"
                 if (id != null && !id.isEmpty()) {
                     List<WebElement> labels = driver.findElements(
                             By.cssSelector("label[for='" + id + "']")
@@ -48,7 +41,6 @@ public class AccessibilityValidator {
                     }
                 }
 
-                // Verifica se está dentro de um label
                 try {
                     WebElement parent = input.findElement(By.xpath("./ancestor::label"));
                     if (parent != null) {
@@ -75,9 +67,6 @@ public class AccessibilityValidator {
         }
     }
 
-    /**
-     * Valida indicação de campos obrigatórios
-     */
     public TestResult validateRequiredFieldsIndication(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -104,14 +93,12 @@ public class AccessibilityValidator {
             int camposComIndicador = 0;
             for (WebElement campo : required) {
                 try {
-                    // Verifica no próprio elemento
                     String ariaRequired = campo.getAttribute("aria-required");
                     if ("true".equals(ariaRequired)) {
                         camposComIndicador++;
                         continue;
                     }
 
-                    // Verifica no parent
                     WebElement parent = campo.findElement(By.xpath(".."));
                     String html = parent.getAttribute("innerHTML");
                     String className = parent.getAttribute("class");
@@ -126,7 +113,7 @@ public class AccessibilityValidator {
             }
 
             double score = (camposComIndicador * 100.0) / required.size();
-            boolean passou = score >= 60; // 60% é aceitável
+            boolean passou = score >= 60;
 
             return createTestResult(
                     "Indicação de Campos Obrigatórios",
@@ -144,9 +131,6 @@ public class AccessibilityValidator {
         }
     }
 
-    /**
-     * Valida atributos ARIA
-     */
     public TestResult validateARIAAttributes(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -177,7 +161,7 @@ public class AccessibilityValidator {
             }
 
             double score = (elementosComARIA * 100.0) / formElements.size();
-            boolean passou = score >= 30; // 30% é aceitável (ARIA é opcional mas bom ter)
+            boolean passou = score >= 30;
 
             return createTestResult(
                     "Atributos ARIA",
@@ -195,9 +179,6 @@ public class AccessibilityValidator {
         }
     }
 
-    /**
-     * Valida visibilidade de elementos
-     */
     public TestResult validateElementVisibility(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -222,7 +203,7 @@ public class AccessibilityValidator {
             }
 
             double score = (elementosVisiveis * 100.0) / inputs.size();
-            boolean passou = score >= 90; // 90% dos elementos devem estar visíveis
+            boolean passou = score >= 90;
 
             return createTestResult(
                     "Visibilidade de Elementos",
@@ -238,8 +219,6 @@ public class AccessibilityValidator {
             return createErrorResult("Visibilidade de Elementos", "Acessibilidade", formUrl, e);
         }
     }
-
-    // ==================== MÉTODOS AUXILIARES ====================
 
     private TestResult createTestResult(String testName, String category,
                                         boolean passed, double score,

@@ -17,9 +17,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
-/**
- * Servlet MELHORADO para diagnosticar problemas de conexão e dados
- */
 @WebServlet("/diagnostico-completo")
 public class DiagnosticEnhancedServlet extends HttpServlet {
 
@@ -50,7 +47,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         out.println("</head><body>");
         out.println("<h1>🔍 DIAGNÓSTICO COMPLETO DO SISTEMA</h1>");
 
-        // TESTE 1: Conexão com banco
         out.println("<div class='section'>");
         out.println("<h2>1️⃣ TESTE DE CONEXÃO COM BANCO DE DADOS</h2>");
         boolean dbConnected = false;
@@ -71,14 +67,12 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         }
         out.println("</div>");
 
-        // TESTE 2: Verificar estrutura das tabelas
         out.println("<div class='section'>");
         out.println("<h2>2️⃣ VERIFICAÇÃO DE ESTRUTURA DAS TABELAS</h2>");
         if (dbConnected) {
             try (Connection conn = DatabaseConnection.getConnection();
                  Statement stmt = conn.createStatement()) {
 
-                // Verifica test_results
                 out.println("<h3>📋 Tabela test_results:</h3>");
                 ResultSet rs = stmt.executeQuery("DESCRIBE test_results");
                 out.println("<table><tr><th>Campo</th><th>Tipo</th><th>Null</th><th>Key</th></tr>");
@@ -92,7 +86,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
                 }
                 out.println("</table>");
 
-                // Conta registros
                 rs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test_results");
                 if (rs.next()) {
                     int count = rs.getInt("cnt");
@@ -106,7 +99,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         }
         out.println("</div>");
 
-        // TESTE 3: Dados do DAO
         out.println("<div class='section'>");
         out.println("<h2>3️⃣ TESTE DE ACESSO AOS DADOS (DAO)</h2>");
         TestResultDAO dao = new TestResultDAO();
@@ -134,7 +126,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         }
         out.println("</div>");
 
-        // TESTE 4: Últimos 10 resultados
         out.println("<div class='section'>");
         out.println("<h2>4️⃣ ÚLTIMOS 10 RESULTADOS DO BANCO</h2>");
         try {
@@ -175,7 +166,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         }
         out.println("</div>");
 
-        // TESTE 5: Inserir dado de teste AGORA
         out.println("<div class='section'>");
         out.println("<h2>5️⃣ TESTE DE INSERÇÃO EM TEMPO REAL</h2>");
         try {
@@ -207,7 +197,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         }
         out.println("</div>");
 
-        // TESTE 6: Verificar URLs
         out.println("<div class='section'>");
         out.println("<h2>6️⃣ VERIFICAÇÃO DE URLs DOS TESTES</h2>");
         out.println("<p>URLs configuradas nos testes:</p>");
@@ -224,7 +213,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         out.println("<p>Context Path atual: <strong>" + request.getContextPath() + "</strong></p>");
         out.println("</div>");
 
-        // TESTE 7: Executar teste real
         out.println("<div class='section'>");
         out.println("<h2>7️⃣ EXECUÇÃO DE TESTE REAL</h2>");
         out.println("<p class='warning'>⚠️ Este teste pode demorar alguns segundos...</p>");
@@ -233,7 +221,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         out.println("</form>");
         out.println("</div>");
 
-        // RESUMO FINAL
         out.println("<div class='section'>");
         out.println("<h2>📊 RESUMO DO DIAGNÓSTICO</h2>");
         out.println("<ol>");
@@ -243,7 +230,6 @@ public class DiagnosticEnhancedServlet extends HttpServlet {
         out.println("</ol>");
         out.println("</div>");
 
-        // AÇÕES RECOMENDADAS
         out.println("<div class='section'>");
         out.println("<h2>🔧 AÇÕES RECOMENDADAS</h2>");
         out.println("<ol>");

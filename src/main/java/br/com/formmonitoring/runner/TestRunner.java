@@ -13,31 +13,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Runner refatorado para executar validações programaticamente
- * Usa os Validators para lógica reutilizável
- */
 public class TestRunner {
 
-    // ✅ URL LIMPA - usando rota servlet
     private static final String FORM_URL = "http://localhost:8080/formmonitoring/form-exemplo";
 
-    /**
-     * Executa todos os testes
-     */
     public static TestExecutionResult runAllTests() {
         long startTime = System.currentTimeMillis();
         TestExecutionResult executionResult = new TestExecutionResult();
 
-        // Executar testes de acessibilidade
         TestExecutionResult accessibilityResult = runAccessibilityTests();
         executionResult.merge(accessibilityResult);
 
-        // Executar testes de usabilidade
         TestExecutionResult usabilityResult = runUsabilityTests();
         executionResult.merge(usabilityResult);
 
-        // Executar testes de performance
         TestExecutionResult performanceResult = runPerformanceTests();
         executionResult.merge(performanceResult);
 
@@ -47,9 +36,6 @@ public class TestRunner {
         return executionResult;
     }
 
-    /**
-     * Executa testes por categoria
-     */
     public static TestExecutionResult runTestsByCategory(String category) {
         switch (category.toLowerCase()) {
             case "acessibilidade":
@@ -63,9 +49,6 @@ public class TestRunner {
         }
     }
 
-    /**
-     * Executa testes de acessibilidade
-     */
     public static TestExecutionResult runAccessibilityTests() {
         long startTime = System.currentTimeMillis();
         TestExecutionResult result = new TestExecutionResult();
@@ -77,7 +60,6 @@ public class TestRunner {
             driver = SeleniumConfig.getDriver();
             AccessibilityValidator validator = new AccessibilityValidator();
 
-            // Executar validações
             TestResult r1 = validator.validateAssociatedLabels(driver, FORM_URL);
             dao.save(r1);
             result.addTestResult(r1);
@@ -110,9 +92,6 @@ public class TestRunner {
         return result;
     }
 
-    /**
-     * Executa testes de usabilidade
-     */
     public static TestExecutionResult runUsabilityTests() {
         long startTime = System.currentTimeMillis();
         TestExecutionResult result = new TestExecutionResult();
@@ -124,7 +103,6 @@ public class TestRunner {
             driver = SeleniumConfig.getDriver();
             UsabilityValidator validator = new UsabilityValidator();
 
-            // Executar validações
             TestResult r1 = validator.validateFieldCount(driver, FORM_URL);
             dao.save(r1);
             result.addTestResult(r1);
@@ -167,9 +145,6 @@ public class TestRunner {
         return result;
     }
 
-    /**
-     * Executa testes de performance
-     */
     public static TestExecutionResult runPerformanceTests() {
         long startTime = System.currentTimeMillis();
         TestExecutionResult result = new TestExecutionResult();
@@ -181,7 +156,6 @@ public class TestRunner {
             driver = SeleniumConfig.getDriver();
             PerformanceValidator validator = new PerformanceValidator();
 
-            // Executar validações
             TestResult r1 = validator.validateLoadingTime(driver, FORM_URL);
             dao.save(r1);
             result.addTestResult(r1);
@@ -219,9 +193,6 @@ public class TestRunner {
         return result;
     }
 
-    /**
-     * Classe para encapsular resultados da execução
-     */
     public static class TestExecutionResult {
         private List<TestResult> results = new ArrayList<>();
         private Map<String, CategoryResult> categoryResults = new HashMap<>();
@@ -231,7 +202,6 @@ public class TestRunner {
         public void addTestResult(TestResult result) {
             results.add(result);
 
-            // Atualiza estatísticas por categoria
             String category = result.getCategory();
             CategoryResult cr = categoryResults.computeIfAbsent(category, k -> new CategoryResult(category));
             cr.totalTests++;
@@ -282,7 +252,6 @@ public class TestRunner {
             return (getPassedTests() * 100.0) / total;
         }
 
-        // Getters e Setters
         public Map<String, CategoryResult> getCategoryResults() {
             return categoryResults;
         }
@@ -304,9 +273,6 @@ public class TestRunner {
         }
     }
 
-    /**
-     * Classe para resultado de categoria
-     */
     public static class CategoryResult {
         public String category;
         public int totalTests;
@@ -320,9 +286,6 @@ public class TestRunner {
         }
     }
 
-    /**
-     * Main para executar via linha de comando
-     */
     public static void main(String[] args) {
         System.out.println("=== Executando Todos os Testes ===\n");
 

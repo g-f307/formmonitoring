@@ -12,9 +12,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Servlet para exibir o dashboard
- */
 @WebServlet("/dashboard")
 public class DashboardServlet extends HttpServlet {
 
@@ -25,24 +22,18 @@ public class DashboardServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            // Busca resultados recentes
             List<TestResult> recentTests = dao.getRecentResults(50);
 
-            // Busca estatísticas por categoria
             Map<String, TestResultDAO.CategoryStats> categoryStats = dao.getCategoryStatistics();
 
-            // Calcula score médio
             double averageScore = dao.getAverageScore();
 
-            // Conta testes passados e falhados
             int passedTests = dao.countPassedTests();
             int failedTests = dao.countFailedTests();
             int totalTests = passedTests + failedTests;
 
-            // Calcula taxa de sucesso
             double successRate = totalTests > 0 ? (passedTests * 100.0) / totalTests : 0.0;
 
-            // Define atributos para o JSP
             request.setAttribute("recentTests", recentTests);
             request.setAttribute("categoryStats", categoryStats);
             request.setAttribute("averageScore", String.format("%.2f", averageScore));
@@ -51,28 +42,23 @@ public class DashboardServlet extends HttpServlet {
             request.setAttribute("totalTests", totalTests);
             request.setAttribute("successRate", String.format("%.2f", successRate));
 
-            // Log para debug
             System.out.println("=== Dashboard Data ===");
             System.out.println("Total Tests: " + totalTests);
             System.out.println("Recent Tests: " + recentTests.size());
             System.out.println("Average Score: " + averageScore);
             System.out.println("Category Stats: " + categoryStats.size());
 
-            // Tenta encontrar o JSP em diferentes locais
             String jspPath = "/jsp/dashboard.jsp";
 
-            // Verifica se o JSP existe
             if (getServletContext().getResource(jspPath) != null) {
                 System.out.println("JSP found at: " + jspPath);
                 request.getRequestDispatcher(jspPath).forward(request, response);
             } else {
-                // Tenta sem o /jsp/
                 jspPath = "/dashboard.jsp";
                 if (getServletContext().getResource(jspPath) != null) {
                     System.out.println("JSP found at: " + jspPath);
                     request.getRequestDispatcher(jspPath).forward(request, response);
                 } else {
-                    // Se não encontrar, retorna erro com informações
                     response.setContentType("text/html;charset=UTF-8");
                     response.getWriter().println("<html><body>");
                     response.getWriter().println("<h1>Erro: dashboard.jsp não encontrado</h1>");

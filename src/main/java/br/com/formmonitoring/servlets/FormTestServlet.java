@@ -13,9 +13,6 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Servlet para executar testes de usabilidade
- */
 @WebServlet("/executar-testes")
 public class FormTestServlet extends HttpServlet {
 
@@ -36,14 +33,11 @@ public class FormTestServlet extends HttpServlet {
             TestRunner.TestExecutionResult result;
 
             if (category != null && !category.isEmpty()) {
-                // Executa testes de uma categoria específica
                 result = TestRunner.runTestsByCategory(category);
             } else {
-                // Executa todos os testes
                 result = TestRunner.runAllTests();
             }
 
-            // Prepara resposta JSON
             Map<String, Object> jsonResponse = new HashMap<>();
             jsonResponse.put("success", result.isSuccess());
             jsonResponse.put("totalTests", result.getTotalTests());

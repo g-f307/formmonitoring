@@ -9,14 +9,8 @@ import org.openqa.selenium.WebElement;
 import java.sql.Timestamp;
 import java.util.List;
 
-/**
- * Validador de Performance e Responsividade
- */
 public class PerformanceValidator {
 
-    /**
-     * Valida tempo de carregamento da página
-     */
     public TestResult validateLoadingTime(WebDriver driver, String formUrl) {
         long inicio = System.currentTimeMillis();
 
@@ -25,7 +19,7 @@ public class PerformanceValidator {
             driver.findElement(By.tagName("body"));
 
             long tempoCarregamento = System.currentTimeMillis() - inicio;
-            boolean passou = tempoCarregamento <= 5000; // 5 segundos
+            boolean passou = tempoCarregamento <= 5000;
 
             double score = 100.0;
             if (tempoCarregamento > 5000) {
@@ -47,9 +41,6 @@ public class PerformanceValidator {
         }
     }
 
-    /**
-     * Valida responsividade em resolução mobile
-     */
     public TestResult validateMobileResponsiveness(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -92,9 +83,6 @@ public class PerformanceValidator {
         }
     }
 
-    /**
-     * Valida responsividade em resolução tablet
-     */
     public TestResult validateTabletResponsiveness(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -137,9 +125,6 @@ public class PerformanceValidator {
         }
     }
 
-    /**
-     * Valida tamanho de fonte
-     */
     public TestResult validateFontSize(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -210,9 +195,6 @@ public class PerformanceValidator {
         }
     }
 
-    /**
-     * Valida espaçamento entre campos
-     */
     public TestResult validateFieldSpacing(WebDriver driver, String formUrl) {
         long startTime = System.currentTimeMillis();
 
@@ -274,8 +256,6 @@ public class PerformanceValidator {
             return createErrorResult("Espaçamento Entre Campos", "Design", formUrl, e);
         }
     }
-
-    // ==================== MÉTODOS AUXILIARES ====================
 
     private TestResult createTestResult(String testName, String category,
                                         boolean passed, double score,

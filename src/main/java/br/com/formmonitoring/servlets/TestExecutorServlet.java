@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Servlet para executar testes com feedback em tempo real via SSE
- */
 @WebServlet("/executar-testes-visual")
 public class TestExecutorServlet extends HttpServlet {
 
@@ -33,7 +30,6 @@ public class TestExecutorServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Configuração para Server-Sent Events (SSE)
         response.setContentType("text/event-stream");
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Cache-Control", "no-cache");
@@ -41,7 +37,7 @@ public class TestExecutorServlet extends HttpServlet {
 
         PrintWriter out = response.getWriter();
 
-        String formType = request.getParameter("formType"); // "good" ou "bad"
+        String formType = request.getParameter("formType");
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" +
                 request.getServerPort() + request.getContextPath();
 
@@ -58,13 +54,11 @@ public class TestExecutorServlet extends HttpServlet {
         List<TestResult> allResults = new ArrayList<>();
 
         try {
-            // Evento: Iniciando
             sendEvent(out, "status", Map.of(
                     "message", "Iniciando WebDriver...",
                     "progress", 0
             ));
 
-            // IMPORTANTE: Desabilita headless para visualização
             driver = SeleniumConfig.getDriver();
 
             sendEvent(out, "status", Map.of(
@@ -72,15 +66,12 @@ public class TestExecutorServlet extends HttpServlet {
                     "progress", 10
             ));
 
-            // Aguarda um pouco para o usuário ver
             Thread.sleep(2000);
 
-            // ==================== TESTES DE USABILIDADE ====================
             UsabilityValidator usabilityValidator = new UsabilityValidator();
             int progress = 20;
             int increment = 60 / 6; // 6 testes de usabilidade
 
-            // 1. Número de Campos
             sendEvent(out, "test-start", Map.of(
                     "testName", "Número Ideal de Campos",
                     "category", "Usabilidade"
@@ -92,7 +83,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r1, progress));
             Thread.sleep(1500);
 
-            // 2. Botão Submit
             sendEvent(out, "test-start", Map.of(
                     "testName", "Botão Submit Visível",
                     "category", "Usabilidade"
@@ -104,7 +94,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r2, progress));
             Thread.sleep(1500);
 
-            // 3. Mensagens de Erro
             sendEvent(out, "test-start", Map.of(
                     "testName", "Estrutura de Mensagens de Erro",
                     "category", "Usabilidade"
@@ -116,7 +105,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r3, progress));
             Thread.sleep(1500);
 
-            // 4. Máscaras de Entrada
             sendEvent(out, "test-start", Map.of(
                     "testName", "Máscaras de Entrada",
                     "category", "Usabilidade"
@@ -128,7 +116,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r4, progress));
             Thread.sleep(1500);
 
-            // 5. Validação Email
             sendEvent(out, "test-start", Map.of(
                     "testName", "Validação de Email",
                     "category", "Validação"
@@ -140,7 +127,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r5, progress));
             Thread.sleep(1500);
 
-            // 6. Agrupamento
             sendEvent(out, "test-start", Map.of(
                     "testName", "Agrupamento Lógico de Campos",
                     "category", "Design"
@@ -152,7 +138,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r6, progress));
             Thread.sleep(1500);
 
-            // ==================== TESTES DE ACESSIBILIDADE ====================
             sendEvent(out, "status", Map.of(
                     "message", "Executando testes de acessibilidade...",
                     "progress", 85
@@ -172,7 +157,6 @@ public class TestExecutorServlet extends HttpServlet {
             sendEvent(out, "test-result", createResultMap(r8, 95));
             Thread.sleep(1000);
 
-            // ==================== RESUMO FINAL ====================
             int totalTests = allResults.size();
             int passedTests = (int) allResults.stream().filter(TestResult::isPassed).count();
             int failedTests = totalTests - passedTests;
@@ -201,7 +185,6 @@ public class TestExecutorServlet extends HttpServlet {
             ));
         } finally {
             if (driver != null) {
-                // Aguarda 3 segundos antes de fechar para o usuário ver o resultado
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -213,18 +196,12 @@ public class TestExecutorServlet extends HttpServlet {
         }
     }
 
-    /**
-     * Envia um evento SSE
-     */
     private void sendEvent(PrintWriter out, String eventType, Map<String, Object> data) {
         out.write("event: " + eventType + "\n");
         out.write("data: " + gson.toJson(data) + "\n\n");
         out.flush();
     }
 
-    /**
-     * Cria mapa de resultado para enviar
-     */
     private Map<String, Object> createResultMap(TestResult result, int progress) {
         Map<String, Object> map = new HashMap<>();
         map.put("testName", result.getTestName());
