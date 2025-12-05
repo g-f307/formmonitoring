@@ -23,7 +23,7 @@ public class FormPerformanceTest {
 
     private WebDriver driver;
     private TestResultDAO dao;
-    private String formUrl = "http://localhost:8080/formmonitoring/form-exemplo.jsp";
+    private String formUrl = "http://localhost:8080/form-monitoring/jsp/form-exemplo.jsp";
     private long startTime;
 
     @Before
