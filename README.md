@@ -1270,71 +1270,6 @@ Taxa de Sucesso = (Testes Passados / Total de Testes) × 100%
 
 ---
 
-## 🤝 Contribuindo
-
-### **Como Contribuir**
-
-1. **Fork o repositório**
-2. **Crie uma branch** para sua feature:
-   ```bash
-   git checkout -b feature/minha-feature
-   ```
-3. **Commit suas mudanças**:
-   ```bash
-   git commit -m "feat: adiciona validador de contraste de cores"
-   ```
-4. **Push para o GitHub**:
-   ```bash
-   git push origin feature/minha-feature
-   ```
-5. **Abra um Pull Request**
-
-### **Padrões de Commit**
-
-Use [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat: adiciona nova funcionalidade
-fix: corrige bug
-docs: atualiza documentação
-test: adiciona testes
-refactor: refatora código sem mudar comportamento
-style: formatação de código
-chore: tarefas de build/configuração
-```
-
----
-
-## 📝 Licença
-
-Este projeto é livre para uso educacional e comercial.
-
----
-
-## 👥 Autores
-
-- **Seu Nome** - Desenvolvimento inicial
-
----
-
-## 🙏 Agradecimentos
-
-- [Selenium WebDriver](https://www.selenium.dev/) - Automação de navegador
-- [Bootstrap](https://getbootstrap.com/) - Framework CSS
-- [Chart.js](https://www.chartjs.org/) - Gráficos interativos
-- [WebDriverManager](https://github.com/bonigarcia/webdrivermanager) - Gerenciamento automático de drivers
-
----
-
-## 📞 Suporte
-
-Encontrou um bug? Tem uma sugestão?
-
-- **Issues**: [GitHub Issues](https://github.com/seu-usuario/form-monitoring/issues)
-- **Email**: seu-email@example.com
-
----
-
 ## 📖 Recursos Adicionais
 
 ### **Artigos Relacionados**
@@ -1349,10 +1284,3 @@ Encontrou um bug? Tem uma sugestão?
 
 ---
 
-<div align="center">
-
-### ⭐ Se este projeto foi útil, considere dar uma estrela!
-
-**Made with ❤️ and ☕**
-
-</div>
