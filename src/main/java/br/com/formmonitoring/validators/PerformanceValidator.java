@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
- * Validador de Performance e Responsividade de Formulários
+ * Validador de Performance e Responsividade
  */
 public class PerformanceValidator {
 
@@ -22,14 +22,14 @@ public class PerformanceValidator {
 
         try {
             driver.get(formUrl);
-            driver.findElement(By.tagName("body")); // Aguarda body estar presente
+            driver.findElement(By.tagName("body"));
 
             long tempoCarregamento = System.currentTimeMillis() - inicio;
-            boolean passou = tempoCarregamento <= 3000;
+            boolean passou = tempoCarregamento <= 5000; // 5 segundos
 
             double score = 100.0;
-            if (tempoCarregamento > 3000) {
-                score = Math.max(50.0, 100.0 - ((tempoCarregamento - 3000) / 100.0));
+            if (tempoCarregamento > 5000) {
+                score = Math.max(50.0, 100.0 - ((tempoCarregamento - 5000) / 100.0));
             }
 
             return createTestResult(
@@ -37,7 +37,7 @@ public class PerformanceValidator {
                     "Performance",
                     passou,
                     score,
-                    String.format("Página carregou em %d ms (limite: 3000ms)", tempoCarregamento),
+                    String.format("Página carregou em %d ms (limite: 5000ms)", tempoCarregamento),
                     formUrl,
                     tempoCarregamento
             );
@@ -54,7 +54,6 @@ public class PerformanceValidator {
         long startTime = System.currentTimeMillis();
 
         try {
-            // Testa em resolução mobile (375x667 - iPhone SE)
             driver.manage().window().setSize(new Dimension(375, 667));
             driver.get(formUrl);
             Thread.sleep(1000);
@@ -64,21 +63,15 @@ public class PerformanceValidator {
             );
 
             int camposVisiveis = 0;
-            int camposClicaveis = 0;
-
             for (WebElement campo : campos) {
                 if (campo.isDisplayed()) {
                     camposVisiveis++;
-                    if (campo.isEnabled()) {
-                        camposClicaveis++;
-                    }
                 }
             }
 
-            boolean passou = camposVisiveis > 0 && camposClicaveis == camposVisiveis;
-            double score = campos.isEmpty() ? 100.0 : (camposClicaveis * 100.0) / campos.size();
+            boolean passou = campos.isEmpty() || camposVisiveis == campos.size();
+            double score = campos.isEmpty() ? 100.0 : (camposVisiveis * 100.0) / campos.size();
 
-            // Restaura tamanho normal
             driver.manage().window().setSize(new Dimension(1920, 1080));
 
             return createTestResult(
@@ -86,18 +79,15 @@ public class PerformanceValidator {
                     "Design",
                     passou,
                     score,
-                    String.format("%d/%d campos visíveis e clicáveis em mobile",
-                            camposClicaveis, campos.size()),
+                    String.format("%d/%d campos visíveis em mobile", camposVisiveis, campos.size()),
                     formUrl,
                     System.currentTimeMillis() - startTime
             );
 
         } catch (Exception e) {
-            // Restaura tamanho em caso de erro
             try {
                 driver.manage().window().setSize(new Dimension(1920, 1080));
             } catch (Exception ignored) {}
-
             return createErrorResult("Responsividade Mobile", "Design", formUrl, e);
         }
     }
@@ -109,7 +99,6 @@ public class PerformanceValidator {
         long startTime = System.currentTimeMillis();
 
         try {
-            // Testa em resolução tablet (768x1024 - iPad)
             driver.manage().window().setSize(new Dimension(768, 1024));
             driver.get(formUrl);
             Thread.sleep(1000);
@@ -125,10 +114,9 @@ public class PerformanceValidator {
                 }
             }
 
-            boolean passou = camposVisiveis == campos.size();
+            boolean passou = campos.isEmpty() || camposVisiveis == campos.size();
             double score = campos.isEmpty() ? 100.0 : (camposVisiveis * 100.0) / campos.size();
 
-            // Restaura tamanho normal
             driver.manage().window().setSize(new Dimension(1920, 1080));
 
             return createTestResult(
@@ -142,11 +130,9 @@ public class PerformanceValidator {
             );
 
         } catch (Exception e) {
-            // Restaura tamanho em caso de erro
             try {
                 driver.manage().window().setSize(new Dimension(1920, 1080));
             } catch (Exception ignored) {}
-
             return createErrorResult("Responsividade Tablet", "Design", formUrl, e);
         }
     }
@@ -169,26 +155,28 @@ public class PerformanceValidator {
             int elementosComFonteAdequada = 0;
             int totalElementos = labels.size() + inputs.size();
 
-            // Verifica labels
             for (WebElement label : labels) {
-                String fontSize = label.getCssValue("font-size");
-                if (fontSize != null && !fontSize.isEmpty()) {
-                    double size = Double.parseDouble(fontSize.replace("px", ""));
-                    if (size >= 14) {
-                        elementosComFonteAdequada++;
+                try {
+                    String fontSize = label.getCssValue("font-size");
+                    if (fontSize != null && !fontSize.isEmpty()) {
+                        double size = Double.parseDouble(fontSize.replace("px", ""));
+                        if (size >= 12) { // Mínimo 12px
+                            elementosComFonteAdequada++;
+                        }
                     }
-                }
+                } catch (Exception ignored) {}
             }
 
-            // Verifica inputs
             for (WebElement input : inputs) {
-                String fontSize = input.getCssValue("font-size");
-                if (fontSize != null && !fontSize.isEmpty()) {
-                    double size = Double.parseDouble(fontSize.replace("px", ""));
-                    if (size >= 14) {
-                        elementosComFonteAdequada++;
+                try {
+                    String fontSize = input.getCssValue("font-size");
+                    if (fontSize != null && !fontSize.isEmpty()) {
+                        double size = Double.parseDouble(fontSize.replace("px", ""));
+                        if (size >= 12) {
+                            elementosComFonteAdequada++;
+                        }
                     }
-                }
+                } catch (Exception ignored) {}
             }
 
             if (totalElementos == 0) {
@@ -204,15 +192,15 @@ public class PerformanceValidator {
             }
 
             double score = (elementosComFonteAdequada * 100.0) / totalElementos;
-            boolean passou = score >= 90;
+            boolean passou = score >= 80;
 
             return createTestResult(
                     "Tamanho de Fonte",
                     "Design",
                     passou,
                     score,
-                    String.format("%d/%d elementos com fonte >= 14px",
-                            elementosComFonteAdequada, totalElementos),
+                    String.format("%d/%d elementos com fonte >= 12px (%.0f%%)",
+                            elementosComFonteAdequada, totalElementos, score),
                     formUrl,
                     System.currentTimeMillis() - startTime
             );
@@ -251,32 +239,33 @@ public class PerformanceValidator {
             int camposComEspacamento = 0;
 
             for (WebElement campo : campos) {
-                String marginBottom = campo.getCssValue("margin-bottom");
-                String paddingBottom = campo.getCssValue("padding-bottom");
+                try {
+                    String marginBottom = campo.getCssValue("margin-bottom");
+                    String paddingBottom = campo.getCssValue("padding-bottom");
 
-                // Verifica se o container pai tem espaçamento
-                WebElement parent = campo.findElement(By.xpath(".."));
-                String parentMargin = parent.getCssValue("margin-bottom");
-                String parentPadding = parent.getCssValue("padding-bottom");
+                    WebElement parent = campo.findElement(By.xpath(".."));
+                    String parentMargin = parent.getCssValue("margin-bottom");
+                    String parentPadding = parent.getCssValue("padding-bottom");
 
-                if ((marginBottom != null && !marginBottom.equals("0px")) ||
-                        (paddingBottom != null && !paddingBottom.equals("0px")) ||
-                        (parentMargin != null && !parentMargin.equals("0px")) ||
-                        (parentPadding != null && !parentPadding.equals("0px"))) {
-                    camposComEspacamento++;
-                }
+                    if ((marginBottom != null && !marginBottom.equals("0px")) ||
+                            (paddingBottom != null && !paddingBottom.equals("0px")) ||
+                            (parentMargin != null && !parentMargin.equals("0px")) ||
+                            (parentPadding != null && !parentPadding.equals("0px"))) {
+                        camposComEspacamento++;
+                    }
+                } catch (Exception ignored) {}
             }
 
             double score = (camposComEspacamento * 100.0) / campos.size();
-            boolean passou = score >= 70;
+            boolean passou = score >= 60;
 
             return createTestResult(
                     "Espaçamento Entre Campos",
                     "Design",
                     passou,
                     score,
-                    String.format("%d/%d campos com espaçamento adequado",
-                            camposComEspacamento, campos.size()),
+                    String.format("%d/%d campos com espaçamento adequado (%.0f%%)",
+                            camposComEspacamento, campos.size(), score),
                     formUrl,
                     System.currentTimeMillis() - startTime
             );

@@ -127,6 +127,10 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
             transition: transform 0.2s, box-shadow 0.2s;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .stat-card:hover {
@@ -166,16 +170,21 @@
         }
 
         .stat-card h3 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             margin: 0;
             color: var(--dark-color);
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .stat-card p {
             margin: 0.25rem 0 0;
             color: #6B7280;
             font-size: 0.875rem;
+            min-height: 1.25rem;
         }
 
         .stat-card .trend {
@@ -353,36 +362,73 @@
             border-color: var(--primary-color);
         }
 
-        /* Loading Overlay */
-        .loading-overlay {
+        /* TEST MODAL - NOVO */
+        .test-modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
         }
 
-        .loading-overlay.active {
+        .test-modal.active {
             display: flex;
         }
 
-        .loading-content {
+        .test-modal-content {
             background: white;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            text-align: center;
-            max-width: 400px;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            border-width: 0.3rem;
+        .test-log {
+            background: #1a1a1a;
+            color: #0f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .test-log-item {
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .test-log-item.pass {
+            color: #0f0;
+        }
+
+        .test-log-item.fail {
+            color: #f00;
+        }
+
+        .test-log-item.info {
+            color: #0ff;
         }
 
         /* Responsive */
@@ -446,9 +492,11 @@
                 </div>
                 <h3>${averageScore}%</h3>
                 <p>Score Médio</p>
-                <span class="trend up">
+                <c:if test="${not empty successRate}">
+                    <span class="trend up">
                         <i class="bi bi-arrow-up"></i> +2.5%
                     </span>
+                </c:if>
             </div>
         </div>
 
@@ -459,9 +507,11 @@
                 </div>
                 <h3>${passedTests}</h3>
                 <p>Testes Aprovados</p>
-                <span class="trend up">
+                <c:if test="${not empty successRate}">
+                    <span class="trend up">
                         <i class="bi bi-arrow-up"></i> ${successRate}%
                     </span>
+                </c:if>
             </div>
         </div>
 
@@ -472,6 +522,7 @@
                 </div>
                 <h3>${failedTests}</h3>
                 <p>Testes Falhados</p>
+                <span class="trend" style="opacity: 0;">placeholder</span>
             </div>
         </div>
 
@@ -482,6 +533,7 @@
                 </div>
                 <h3>${totalTests}</h3>
                 <p>Total de Testes</p>
+                <span class="trend" style="opacity: 0;">placeholder</span>
             </div>
         </div>
     </div>
@@ -516,7 +568,7 @@
         <div class="alert alert-info mb-4">
             <i class="bi bi-info-circle"></i>
             <strong>Como funciona:</strong> Selecione um formulário abaixo e clique em "Iniciar Teste Visual".
-            Você verá cada validação sendo executada em tempo real com indicadores visuais.
+            Você verá o navegador abrindo e cada validação sendo executada em tempo real!
         </div>
 
         <div class="row g-3">
@@ -588,14 +640,14 @@
                             <td>
                                 <c:choose>
                                     <c:when test="${test.passed}">
-                                                <span class="badge status-pass">
-                                                    <i class="bi bi-check"></i> Passou
-                                                </span>
+                                        <span class="badge status-pass">
+                                            <i class="bi bi-check"></i> Passou
+                                        </span>
                                     </c:when>
                                     <c:otherwise>
-                                                <span class="badge status-fail">
-                                                    <i class="bi bi-x"></i> Falhou
-                                                </span>
+                                        <span class="badge status-fail">
+                                            <i class="bi bi-x"></i> Falhou
+                                        </span>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
@@ -625,14 +677,40 @@
     </div>
 </div>
 
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-        <div class="spinner-border text-primary mb-3" role="status">
-            <span class="visually-hidden">Loading...</span>
+<!-- Test Modal -->
+<div class="test-modal" id="testModal">
+    <div class="test-modal-content">
+        <h4 class="mb-4" id="modalTitle">
+            <i class="bi bi-gear-fill"></i> Executando Testes em Tempo Real
+        </h4>
+
+        <div class="mb-3">
+            <div class="progress" style="height: 30px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                     id="progressBar"
+                     style="width: 0%">
+                    <strong id="progressText">0%</strong>
+                </div>
+            </div>
         </div>
-        <h5>Executando Testes...</h5>
-        <p class="text-muted mb-0">Aguarde enquanto analisamos o formulário</p>
+
+        <div class="alert alert-info" id="statusMessage">
+            <i class="bi bi-info-circle"></i>
+            <strong id="statusText">Iniciando testes...</strong>
+        </div>
+
+        <div class="test-log" id="testLog">
+            <div class="test-log-item info">🚀 Sistema iniciado - aguarde...</div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <button class="btn btn-secondary" onclick="closeModal()">
+                <i class="bi bi-x-circle"></i> Fechar
+            </button>
+            <button class="btn btn-primary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar Dashboard
+            </button>
+        </div>
     </div>
 </div>
 
@@ -687,18 +765,6 @@
                             weight: '500'
                         }
                     }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
-                    titleFont: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    bodyFont: {
-                        size: 12
-                    }
                 }
             },
             scales: {
@@ -706,11 +772,6 @@
                     stacked: true,
                     grid: {
                         display: false
-                    },
-                    ticks: {
-                        font: {
-                            size: 11
-                        }
                     }
                 },
                 y: {
@@ -721,10 +782,7 @@
                         borderDash: [3, 3]
                     },
                     ticks: {
-                        stepSize: 1,
-                        font: {
-                            size: 11
-                        }
+                        stepSize: 1
                     }
                 }
             }
@@ -760,19 +818,6 @@
                             weight: '500'
                         }
                     }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.parsed || 0;
-                            const percentage = totalTestsChart > 0 ? ((value / totalTestsChart) * 100).toFixed(1) : 0;
-                            return label + ': ' + value + ' (' + percentage + '%)';
-                        }
-                    }
                 }
             }
         },
@@ -799,31 +844,123 @@
         }]
     });
 
-    // Visual Test Function
-    function startVisualTest(type) {
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.classList.add('active');
+    // VISUAL TEST FUNCTION - NOVO
+    let eventSource = null;
 
-        const url = type === 'good'
-            ? '${pageContext.request.contextPath}/form-exemplo'
-            : '${pageContext.request.contextPath}/form-ruim';
+    function startVisualTest(formType) {
+        const modal = document.getElementById('testModal');
+        const log = document.getElementById('testLog');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const statusText = document.getElementById('statusText');
+        const modalTitle = document.getElementById('modalTitle');
 
-        // Simula início do teste
-        fetch('${pageContext.request.contextPath}/executar-testes?category=usabilidade', {
-            method: 'POST'
-        })
-            .then(response => response.json())
-            .then(data => {
-                setTimeout(() => {
-                    overlay.classList.remove('active');
-                    alert(`Teste concluído!\n\nAprovados: ${data.passedTests}\nReprovados: ${data.failedTests}\nTaxa de sucesso: ${data.successRate.toFixed(1)}%`);
-                    location.reload();
-                }, 3000);
-            })
-            .catch(error => {
-                overlay.classList.remove('active');
-                alert('Erro ao executar teste: ' + error);
-            });
+        // Limpa log anterior
+        log.innerHTML = '<div class="test-log-item info">🚀 Iniciando testes...</div>';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+
+        // Abre modal
+        modal.classList.add('active');
+
+        // Define título
+        modalTitle.innerHTML = formType === 'good'
+            ? '<i class="bi bi-check-circle text-success"></i> Testando Formulário BOM'
+            : '<i class="bi bi-x-circle text-danger"></i> Testando Formulário RUIM';
+
+        // Fecha conexão anterior se existir
+        if (eventSource) {
+            eventSource.close();
+        }
+
+        // Cria conexão SSE
+        const url = '${pageContext.request.contextPath}/executar-testes-visual?formType=' + formType;
+        eventSource = new EventSource(url);
+
+        // Evento: Status
+        eventSource.addEventListener('status', function(e) {
+            const data = JSON.parse(e.data);
+            addLog('ℹ️ ' + data.message, 'info');
+            updateProgress(data.progress, data.message);
+        });
+
+        // Evento: Teste iniciado
+        eventSource.addEventListener('test-start', function(e) {
+            const data = JSON.parse(e.data);
+            addLog('▶️ Executando: ' + data.testName + ' (' + data.category + ')', 'info');
+        });
+
+        // Evento: Resultado do teste
+        eventSource.addEventListener('test-result', function(e) {
+            const data = JSON.parse(e.data);
+            const status = data.passed ? '✅ PASSOU' : '❌ FALHOU';
+            const cssClass = data.passed ? 'pass' : 'fail';
+            const score = data.score.toFixed(1);
+
+            addLog(status + ' - ' + data.testName + ' (' + score + '%) - ' + data.details, cssClass);
+            updateProgress(data.progress, 'Teste: ' + data.testName);
+        });
+
+        // Evento: Concluído
+        eventSource.addEventListener('complete', function(e) {
+            const data = JSON.parse(e.data);
+            addLog('', 'info');
+            addLog('🎉 TESTES CONCLUÍDOS!', 'info');
+            addLog('📊 Total: ' + data.totalTests + ' | Passou: ' + data.passedTests + ' | Falhou: ' + data.failedTests, 'info');
+            addLog('📈 Taxa de sucesso: ' + data.successRate + '%', 'info');
+
+            updateProgress(100, 'Concluído!');
+            statusText.textContent = 'Testes concluídos! Taxa de sucesso: ' + data.successRate + '%';
+
+            if (eventSource) {
+                eventSource.close();
+            }
+        });
+
+        // Evento: Erro
+        eventSource.addEventListener('error', function(e) {
+            try {
+                const data = JSON.parse(e.data);
+                addLog('❌ ERRO: ' + data.message, 'fail');
+            } catch(err) {
+                addLog('❌ Erro na conexão', 'fail');
+            }
+            eventSource.close();
+        });
+
+        // Erro de conexão
+        eventSource.onerror = function() {
+            addLog('❌ Erro na conexão com o servidor', 'fail');
+            if (eventSource) eventSource.close();
+        };
+    }
+
+    function addLog(message, type) {
+        const log = document.getElementById('testLog');
+        const item = document.createElement('div');
+        item.className = 'test-log-item ' + type;
+        item.textContent = message;
+        log.appendChild(item);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function updateProgress(percent, message) {
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const statusText = document.getElementById('statusText');
+
+        progressBar.style.width = percent + '%';
+        progressText.textContent = Math.round(percent) + '%';
+        statusText.textContent = message;
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('testModal');
+        modal.classList.remove('active');
+
+        if (eventSource) {
+            eventSource.close();
+        }
     }
 
     // Smooth Scroll
